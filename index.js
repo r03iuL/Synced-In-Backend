@@ -21,16 +21,15 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     await client.connect();
-    const All_jobs = client.db("All_jobs");
-    const jobs = All_jobs.collection("jobs");
+    const JobsDb = client.db("JobsDb");
+    const Jobs = JobsDb.collection("Jobs");
 
-    app.post("/jobs",  async(req, res) => {
-        const job = req.body
-        
-          const result = await jobs.insertOne(job);
-          console.log(result);
-      });
-    
+    app.post("/jobs", async (req, res) => {
+      const job = req.body;
+
+      const result = await Jobs.insertOne(job);
+      console.log(result);
+    });
 
     console.log("You successfully connected to MongoDB!");
   } finally {
@@ -42,21 +41,22 @@ run().catch(console.log);
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
+
 app.get("/jobsstored", async (req, res) => {
-    try {
-      await client.connect();
-      const All_jobs = client.db("All_jobs");
-      const jobs = All_jobs.collection("jobs");
-  
-      const jobList = await jobs.find().toArray();
-      res.status(200).json(jobList);
-    } catch (error) {
-      console.error(error);
-      res.status(500).send("Error retrieving jobs");
-    } finally {
-      await client.close();
-    }
-  });
+  try {
+    await client.connect();
+    const JobsDb = client.db("JobsDb");
+    const Jobs = JobsDb.collection("Jobs");
+
+    const jobList = await Jobs.find().toArray();
+    res.status(200).json(jobList);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error retrieving jobs");
+  } finally {
+    await client.close();
+  }
+});
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
